@@ -1,0 +1,10 @@
+D:\Working\SampleApplication\bin\Debug\SampleApplication.exe.config
+D:\Working\SampleApplication\bin\Debug\SampleApplication.exe
+D:\Working\SampleApplication\bin\Debug\SampleApplication.pdb
+D:\Working\SampleApplication\obj\Debug\SampleApplication.csproj.AssemblyReference.cache
+D:\Working\SampleApplication\obj\Debug\SampleApplication.csproj.SuggestedBindingRedirects.cache
+D:\Working\SampleApplication\obj\Debug\SampleApplication.Properties.Resources.resources
+D:\Working\SampleApplication\obj\Debug\SampleApplication.csproj.GenerateResource.cache
+D:\Working\SampleApplication\obj\Debug\SampleApplication.csproj.CoreCompileInputs.cache
+D:\Working\SampleApplication\obj\Debug\SampleApplication.exe
+D:\Working\SampleApplication\obj\Debug\SampleApplication.pdb
