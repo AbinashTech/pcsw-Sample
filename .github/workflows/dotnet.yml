@@ -1,26 +1,21 @@
-name: .NET
+name: ".NET Framework Desktop"
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 env:
-  PROJECT_PATH: 'SampleApplication/SampleApplication.sln'
+  solution: 'SampleApplication/SampleApplication.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '4.0.x'
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.PROJECT_PATH }}
-    - name: Build
-      run: dotnet build ${{ env.PROJECT_PATH }}
-   
+    - uses: actions/checkout@v2
+    - uses: nuget/setup-nuget@v1    
+    - run: nuget restore '${{ env.solution }}'
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
