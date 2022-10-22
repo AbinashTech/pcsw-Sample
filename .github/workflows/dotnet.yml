@@ -9,8 +9,36 @@ env:
   buildConfiguration: 'Release'
 
 jobs:
-  build:
+  DEV:
     runs-on: windows-latest
+    environment: DEV
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nuget/setup-nuget@v1    
+    - run: nuget restore '${{ env.solution }}'
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
+    
+  QA:
+    runs-on: windows-latest
+    environment: QA
+    needs: DEV
+    
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nuget/setup-nuget@v1    
+    - run: nuget restore '${{ env.solution }}'
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
+    
+  PROD:
+    runs-on: windows-latest
+    environment: PROD
+    needs: QA
 
     steps:
     - uses: actions/checkout@v2
