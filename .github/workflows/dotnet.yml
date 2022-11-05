@@ -1,54 +1,66 @@
-name: ".NET Framework Desktop"
+name: "Nuget ci"
 
 on:
-  push:
+ push:
     branches: [ main ]
+
+ pull_request:
+    branches: [ main ]
+
 env:
-  solution: 'SampleApplication/SampleApplication.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  PROJECT_PATH: 'SampleApplication/SampleApplication/.sln'
 
 jobs:
-  DEV:
+  release-project:
+    name: Release Project
     runs-on: windows-latest
-    environment: DEV
-
+    needs: build
     steps:
-    - uses: actions/checkout@v2
-    - uses: nuget/setup-nuget@v1    
-    - run: nuget restore '${{ env.solution }}'
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
-    
-
-    
-
+      - name: Downlaod site Content
+        uses: actions/download-artifact@v3
+        with:
+          name: app
+      - name: Archive Site Content 
+        uses: thedoctor0/zip-release@main
+        with:
+          filename :  ./SampleApplication/bin/Debug/SampleApplication.exe
+ 
+      - name: Create Gith8b Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.SECRET_GITHUB_TOKEN}}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release V${{ github.run_number }}
+      - name: Upload asset to githubb Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.SECRET_GITHUB_TOKEN}}
+        with:
+         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+         asset_path: ./WinFormsApp1/WinFormsApp1/bin/Debug/net6.0-windows/WinFormsApp1.exe.zip
+         asset_name: WinFormsApp1-v${{ github.run_number }}
+         asset_content_type: WinFormsApp1/zip
+      
+  build:
   
-    
-  QA:
     runs-on: windows-latest
-    environment: QA
-    needs: DEV
-    
 
     steps:
     - uses: actions/checkout@v2
-    - uses: nuget/setup-nuget@v1    
-    - run: nuget restore '${{ env.solution }}'
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
-    
-  PROD:
-    runs-on: windows-latest
-    environment: PROD
-    needs: QA
-
-    steps:
-    - uses: actions/checkout@v2
-    - uses: nuget/setup-nuget@v1    
-    - run: nuget restore '${{ env.solution }}'
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-    - run: msbuild '${{ env.solution }}' /p:Configuration='${{ env.buildConfiguration }}' /p:platform='${{ env.buildPlatform }}'
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Install dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+    - name: Build
+      run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+      
+    - name: Upload a Build Artifact  
+      uses: actions/upload-artifact@v2.2.4   
+      with:
+         name: app
+         path: ./SampleApplication/bin/Debug/SampleApplication.exe
+ 
